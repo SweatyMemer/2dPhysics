@@ -64,14 +64,15 @@ circle.setFillColor(sf::Color::Green);
 
 
 // DECLARE INITIAL VARIABLES FOR SIMULATION
-double deltaTime = 1.0 / 60.0;
-sf::Vector2f pos = sf::Vector2f(200.0, 200.0);
-sf::Vector2f accel = sf::Vector2f(0.0, 300.0);
-sf::Vector2f velocity = sf::Vector2f(200.0, 0.0);
-double dampening = 0.8;
+double deltaTime = 1.0 / fps;
+sf::Vector2f pos = sf::Vector2f(200.0, 00.0);
+// sf::Vector2f accel = sf::Vector2f(0.0, 576.0);
+sf::Vector2f accel = sf::Vector2f(0.0, 0.0);
+sf::Vector2f velocity = sf::Vector2f(00.0, 0.0);
+double dampening = 0.7;
 
 
-
+bool isDragging = false;
 int frameDelay = 15;
 unsigned short frameCounter = 0;
 int circleCount = 0;
@@ -120,30 +121,47 @@ while (window.isOpen())
     {
         velocity.x = -velocity.x * dampening;
         pos.x = wallLeft.getBounds().left;
-        cout << velocity.x << endl;
+        // cout << velocity.x << endl;
     }
     else if ((circle.getPosition().x + circle.getRadius() * 2) >= wallRight.getBounds().left)
     {
         velocity.x = -velocity.x * dampening;
         pos.x = (wallRight.getBounds().left) - circle.getRadius() * 2;
-        cout << velocity.x << endl;
+        // cout << velocity.x << endl;
     };
 
 	if (circle.getPosition().y <= wallTop.getBounds().top)
 	{
 		velocity.y = -velocity.y * dampening;
         pos.y = wallTop.getBounds().top;
-		cout << velocity.y << endl;
+		// cout << velocity.y << endl;
 	}
     else if ((circle.getPosition().y + circle.getRadius() * 2) >= wallBottom.getBounds().top)
     {
         velocity.y = -velocity.y * dampening;
-        // pos.y + circle.getRadius()*2 = wallBottom.getBounds().top
         pos.y = (wallBottom.getBounds().top) - circle.getRadius() * 2;
-        cout << velocity.y << endl;
+        // cout << velocity.y << endl;
     }
 
 
+
+    // MOUSE CURSOR TO PICK BALL UP
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) == true && sf::Mouse::getPosition(window).x >= circle.getPosition().x && sf::Mouse::getPosition(window).x <= (circle.getPosition().x + circle.getRadius() * 2)
+        && sf::Mouse::getPosition(window).y <= (circle.getPosition().y + circle.getRadius() * 2) && sf::Mouse::getPosition(window).y >= circle.getRadius())
+    {
+        isDragging = true;
+    }
+    else if (!sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+    {
+        isDragging = false;
+    }
+
+    if (isDragging)
+    {
+        cout << "dragging circle" << endl;
+        pos.x = sf::Mouse::getPosition(window).x - circle.getRadius();
+        pos.y = sf::Mouse::getPosition(window).y - circle.getRadius();
+    }
 
 	text.setString(to_string(circle.getPosition().x) + ", " + to_string(circle.getPosition().y));
 
