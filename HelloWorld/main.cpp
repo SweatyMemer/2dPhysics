@@ -5,7 +5,7 @@
 
 using namespace std;
 
-string current_working_dir()
+string currentWorkingDir()
 {
     char buff[260];
     _getcwd(buff, 260);
@@ -19,7 +19,7 @@ int main()
 {   
     int fps = 60;
     // CREATE WINDOW
-    sf::RenderWindow window(sf::VideoMode(640, 480), "SFML works!");   
+    sf::RenderWindow window(sf::VideoMode(640, 480), "pog");   
     window.setFramerateLimit(fps);
     
 
@@ -67,8 +67,8 @@ circle.setFillColor(sf::Color::Green);
 double deltaTime = 1.0 / fps;
 sf::Vector2f pos = sf::Vector2f(200.0, 00.0);
 // sf::Vector2f accel = sf::Vector2f(0.0, 576.0);
-sf::Vector2f accel = sf::Vector2f(0.0, 0.0);
-sf::Vector2f velocity = sf::Vector2f(00.0, 0.0);
+sf::Vector2f accel = sf::Vector2f(0.0, 576.0);
+sf::Vector2f velocity = sf::Vector2f(0.0, 200.0);
 double dampening = 0.7;
 
 
@@ -77,6 +77,9 @@ int frameDelay = 15;
 unsigned short frameCounter = 0;
 int circleCount = 0;
 vector<sf::CircleShape> vCircles;
+sf::Vector2f lastFramePos = sf::Vector2f(NULL, NULL);
+sf::Vector2f distanceMoved;
+sf::Vector2f velocityWhileDragged;
 // RENDER LOOP
 while (window.isOpen())
 {
@@ -89,12 +92,46 @@ while (window.isOpen())
         }
     }
 
-    // CALCULATING CIRCLE POSITION
-    velocity.x = velocity.x + (accel.x * deltaTime);
-    velocity.y = velocity.y + (accel.y * deltaTime);
+    // MOUSE CURSOR TO PICK BALL UP
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) == true && sf::Mouse::getPosition(window).x >= circle.getPosition().x && sf::Mouse::getPosition(window).x <= (circle.getPosition().x + circle.getRadius() * 2)
+        && sf::Mouse::getPosition(window).y <= (circle.getPosition().y + circle.getRadius() * 2) && sf::Mouse::getPosition(window).y >= circle.getRadius())
+    {
+        isDragging = true;
+    }
+    else if (!sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+    {
+        isDragging = false;
 
-    pos.x = pos.x + (velocity.x * deltaTime);
-    pos.y = pos.y + (velocity.y * deltaTime);
+    }
+
+    if (isDragging)
+    {
+        pos.x = sf::Mouse::getPosition(window).x - circle.getRadius();
+        pos.y = sf::Mouse::getPosition(window).y - circle.getRadius();
+        velocity = velocityWhileDragged;
+    }
+
+    if (!isDragging)
+    {
+        // CALCULATING CIRCLE POSITION
+        velocity.x = velocity.x + (accel.x * deltaTime);
+        velocity.y = velocity.y + (accel.y * deltaTime);
+
+        pos.x = pos.x + (velocity.x * deltaTime);
+        pos.y = pos.y + (velocity.y * deltaTime);
+
+    };
+
+
+    if (lastFramePos.x != NULL && lastFramePos.y != NULL)
+    {
+        distanceMoved.x = pos.x - lastFramePos.x;
+        distanceMoved.y = pos.y - lastFramePos.y;
+
+        velocityWhileDragged.x = distanceMoved.x * (deltaTime * 1000); // converting the deltaTime to seconds
+        velocityWhileDragged.y = distanceMoved.y * (deltaTime * 1000);
+
+    };
 
 
     if (frameCounter < frameDelay)
@@ -145,25 +182,9 @@ while (window.isOpen())
 
 
 
-    // MOUSE CURSOR TO PICK BALL UP
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) == true && sf::Mouse::getPosition(window).x >= circle.getPosition().x && sf::Mouse::getPosition(window).x <= (circle.getPosition().x + circle.getRadius() * 2)
-        && sf::Mouse::getPosition(window).y <= (circle.getPosition().y + circle.getRadius() * 2) && sf::Mouse::getPosition(window).y >= circle.getRadius())
-    {
-        isDragging = true;
-    }
-    else if (!sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
-    {
-        isDragging = false;
-    }
+	text.setString(to_string(velocityWhileDragged.x) + ", " + to_string(velocityWhileDragged.y));
 
-    if (isDragging)
-    {
-        cout << "dragging circle" << endl;
-        pos.x = sf::Mouse::getPosition(window).x - circle.getRadius();
-        pos.y = sf::Mouse::getPosition(window).y - circle.getRadius();
-    }
-
-	text.setString(to_string(circle.getPosition().x) + ", " + to_string(circle.getPosition().y));
+    lastFramePos = pos;
 
 	window.clear();
 	window.draw(circle);
