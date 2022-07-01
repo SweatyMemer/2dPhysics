@@ -79,7 +79,7 @@ int main()
     // sf::Vector2f accel = sf::Vector2f(0.0, 576.0);
     sf::Vector2f accel = sf::Vector2f(0.0, 576.0);
     sf::Vector2f velocity = sf::Vector2f(0.0, 200.0);
-    double dampening = 0.7;
+    double dampening = 0.8;
     int throwModifier = 1500;
 
     bool trailOn = true;
@@ -190,7 +190,10 @@ int main()
         else if ((circle.getPosition().y + circle.getRadius() * 2) >= wallBottom.getBounds().top)
         {
             velocity.y = -velocity.y * dampening;
-            velocity.x = velocity.x * 0.99;
+            if (dampening != 1)
+            {
+                velocity.x = velocity.x * 0.99;
+            }
             pos.y = (wallBottom.getBounds().top) - circle.getRadius() * 2;
             // cout << velocity.y << endl;
         }
